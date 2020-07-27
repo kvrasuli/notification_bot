@@ -15,12 +15,12 @@ def run_bot(devman_token, telegram_token, chat_id):
                 params['timestamp'] = response.json()['timestamp_to_request']
             elif response.json()['status'] == 'found':
                 for attempt in response.json()['new_attempts']:
-                    message = f"Урок \"{attempt['lesson_title']}\" проверен!"
+                    message = f"The lesson \"{attempt['lesson_title']}\" has been assessed!"
                     if attempt['is_negative']:
-                        message += 'Не, ну это бан.'
+                        message += 'Give it a one more try.'
                         bot.send_message(chat_id=chat_id, text=message)
                     else:
-                        message += 'Заебись, четко!'
+                        message += 'Everything is OK, go ahead!'
                         bot.send_message(chat_id=chat_id, text=message)
         except requests.exceptions.ReadTimeout:
             print('Timeout!')
