@@ -31,15 +31,21 @@ def run_bot(devman_token, telegram_token, chat_id, logger):
     logger.info('The bot is running!')
     while True:
         try:
-            response = requests.get(url, headers=headers, params=params, timeout=90)
+            response = requests.get(
+                url,
+                headers=headers,
+                params=params,
+                timeout=90
+            )
             response.raise_for_status()
-            response_decoded = response.json()
-            if response_decoded['status'] == 'timeout':
-                params['timestamp'] = response_decoded['timestamp_to_request']
-            elif response_decoded['status'] == 'found':
-                params['timestamp'] = response_decoded['last_attempt_timestamp']
-                for attempt in response_decoded['new_attempts']:
-                    message = f"The lesson \"{attempt['lesson_title']}\" has been assessed!"
+            dvmn_response = response.json()
+            if dvmn_response['status'] == 'timeout':
+                params['timestamp'] = dvmn_response['timestamp_to_request']
+            elif dvmn_response['status'] == 'found':
+                params['timestamp'] = dvmn_response['last_attempt_timestamp']
+                for attempt in dvmn_response['new_attempts']:
+                    message = f"The lesson \"{attempt['lesson_title']}\" \
+                                has been assessed!"
                     if attempt['is_negative']:
                         message += ' Give it a one more try.'
                         bot.send_message(chat_id=chat_id, text=message)
@@ -57,6 +63,7 @@ def run_bot(devman_token, telegram_token, chat_id, logger):
             tb.print_exc()
             sys.exit()
 
+
 def main():
     load_dotenv()
     telegram_token = os.getenv('TELEGRAM_TOKEN')
@@ -73,8 +80,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-
-
-
-    
-    
