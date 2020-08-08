@@ -9,7 +9,7 @@ Create 3 corresponding environment variables:
 ```
 DEVMAN_TOKEN='your devman token'
 TELEGRAM_TOKEN='your notification bot token'
-CHAT_ID='your chat id'
+TG_CHAT_ID='your chat id'
 TG_LOGGER_TOKEN='your logging bot token'
 ```
 Just run the python script main.py with the following concole command:

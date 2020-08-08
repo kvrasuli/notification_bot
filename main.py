@@ -4,11 +4,16 @@ from dotenv import load_dotenv
 import os
 import time
 import logging
+import sys
+import traceback as tb
+
+
+logger = logging.getLogger('Batman')
 
 
 class LogsHandler(logging.Handler):
     def __init__(self, token, chat_id):
-        super(LogsHandler, self).__init__()
+        super().__init__()
         self.token = token
         self.bot = telegram.Bot(token=self.token)
         self.chat_id = chat_id
@@ -20,13 +25,12 @@ class LogsHandler(logging.Handler):
 
 def run_bot(devman_token, telegram_token, chat_id, logger):
     url = 'https://dvmn.org/api/long_polling/'
-    headers = {'Authorization': 'Token ' + devman_token}
+    headers = {'Authorization': f'Token {devman_token}'}
     params = {'timestamp': ''}
     bot = telegram.Bot(token=telegram_token)
-    logging.warning('The bot is running!')
+    logger.info('The bot is running!')
     while True:
         try:
-            response = requests.get(url)
             response = requests.get(url, headers=headers, params=params, timeout=90)
             response.raise_for_status()
             response_decoded = response.json()
@@ -45,24 +49,26 @@ def run_bot(devman_token, telegram_token, chat_id, logger):
         except requests.exceptions.ReadTimeout:
             pass
         except ConnectionError:
+            logger.exception('Connection error!')
+            tb.print_exc()
             time.sleep(60)
         except Exception:
-            logger.exception(Exception)
-
+            logger.exception('Error!')
+            tb.print_exc()
+            sys.exit()
 
 def main():
     load_dotenv()
     telegram_token = os.getenv('TELEGRAM_TOKEN')
     devman_token = os.getenv('DEVMAN_TOKEN')
     tg_logger_token = os.getenv('TG_LOGGER_TOKEN')
-    chat_id = os.getenv('CHAT_ID')
+    tg_chat_id = os.getenv('TG_CHAT_ID')
 
-    logger = logging.getLogger('Logger')
-    logger.setLevel(logging.WARNING)
-    logger.addHandler(LogsHandler(tg_logger_token, chat_id))
-    logger.warning("I'm Batman")
+    logger.setLevel(logging.INFO)
+    logger.addHandler(LogsHandler(tg_logger_token, tg_chat_id))
+    logger.info("I'm Batman")
 
-    run_bot(devman_token, telegram_token, chat_id, logger)
+    run_bot(devman_token, telegram_token, tg_chat_id, logger)
 
 
 if __name__ == '__main__':
